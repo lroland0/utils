@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MasterMind JS</title>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="js.css"/>
+</head>
+<body>
+	<div>Code : <span id="code"></span></div>
+	<!-- Question 5-->
+	<!-- bouton « Nouvelle partie » + fonction newCode() lorsque l’on clique dessus-->
+	<button onclick="newCode();newCombi();">Nouvelle partie</button>
+
+	<!-- Question 6 -->
+	<div id="game"><button onclick="changeColor(this,0);">0</button></div>
+
+<script>
+	//Question 1
+	//tableau contenant 3 chiffres initialisés à 0 -->
+	var tab=[0,0,0];
+
+	//Question 2
+	//valeurs dans la console en utilisant la méthode toString()
+	console.log(tab.toString());
+
+	//Question 9 - tableau combi contenant 3 indexes (pour les 3 boutons)
+	var combi=[0,0,0];
+
+	//Question 11 - variables globales bp et mp
+	var bp=0,mp=0;
+	
+
+	//Question 3
+	//fonction newCode(), génére aléatoirement le code de 3 valeurs entre 0 et 7 inclus
+	//Math.random() qui renvoi un nombre aléatoire entre 0 et 1 et la fonction
+	//Math.floor() qui arrondi vers le bas
+	newCode();
+	function newCode(){
+		for(k in tab){
+			var v=Math.floor(8*Math.random());
+			tab[k]=v;
+			console.log("Case "+k+" "+v);
+		}
+		console.log(tab.toString());
+		//Question 4
+		//modifier le contenu de la balise d’identifiant « code » pour afficher les différents chiffres du code
+		document.getElementById("code").innerHTML=tab.toString();
+		document.getElementById("game").innerHTML="";
+
+		//Q10-Q11
+		for (k in combi) {combi[k]=0;}
+		newCombi();
+	}
+	
+	//Question 6
+	//fonction changeColor(btn) qui change à chaque clic (et en boucle), la couleur d’un bouton
+	//setAttribute(attr,val) pour changer la classe CSS du bouton à chaque clic
+	//entier i représentant l’indexe de la couleur dans le tableau
+	//valeur dans le contenu du bouton
+	//ne pas dépasser la taille du tableau de couleurs
+	var colors=["rouge","jaune","vert","bleu","orange","blanc","violet","fuchsia"];
+	var i=0;
+	function changeColor(btn,numBtn){
+		i=combi[numBtn]; //Q9 - indiquer « le numéro » de bouton
+		console.log("Click "+numBtn+" color:"+colors[i]);
+		btn.innerHTML=i; //Q9 - indiquer « le numéro » de bouton
+		
+		btn.setAttribute("class",colors[i]);
+		i++;
+		i=i%colors.length;
+		combi[numBtn]=i;//Q9 - indiquer « le numéro » de bouton
+	}
+
+	//Question 7
+	// ligne de 3 boutons pour la combinaison + 2 span pour les résultats 
+	// + bouton de validation = fonction newCombi()
+	// Fixer le contenu de chaque bouton au numéro de case + « - » pour les span
+	function newCombi(){
+		var create=document.createElement("div");
+		create.setAttribute("class","combi")
+		//3 boutons
+		for (k in tab){
+			var button=document.createElement("button");
+			button.innerHTML=k;
+			button.setAttribute("onclick","changeColor(this,"+k+");");
+			create.appendChild(button);
+		}
+		//span bien placé
+		var span=document.createElement("span");
+		span.innerHTML="-";
+		create.appendChild(span);
+		//Question 8 -  attributs class pour les spans
+		span.setAttribute("class","bp");
+
+		//span mal placé
+		var span2=document.createElement("span");
+		span2.innerHTML="-";
+		create.appendChild(span2);
+		//Question 8 -  attributs class pour les spans
+		span2.setAttribute("class","mp");
+
+		//bouton OK
+		var ok=document.createElement("button");
+		ok.innerHTML="OK";
+		ok.setAttribute("onclick","verif(this);")
+		create.appendChild(ok);
+		var game=document.getElementById("game");
+		game.appendChild(create);
+	}
+
+	//Question 10
+	//fonction verif(btn) exécutée lors du clic sur OK, pour désactiver tous les boutons
+	function verif(btnOK){
+		var childs=btnOK.parentNode.childNodes;
+		for (k in childs){
+ 			if (childs[k].tagName=='BUTTON') childs[k].disabled=true;
+		}
+		checkCombi(tab,combi);
+		var spanBP=childs[3];
+		spanBP.innerHTML="BP: "+bp;
+		var spanMP=childs[4];
+		spanMP.innerHTML="MP: "+mp;
+		if (bp!=3) newCombi();
+		else {
+			var gagne=document.createElement("h1");
+			gagne.innerHTML="Vous avez gagné";
+			var game=document.getElementById("game");
+			game.appendChild(gagne);
+		}
+	}
+
+	//Question 11
+	//fonction checkCombi qui modifie les variables globales bp et mp
+	//Mettre à jour le contenu des spans et ajouter une nouvelle combinaison
+	function checkCombi(tab,combi){
+		bp=0;
+		mp=0;
+		var check=tab.slice() //Recopie
+
+		//BP
+		for (k in check){
+			if (combi[k]==check[k]){
+				bp++;
+				check[k]=-1;
+			}
+		}
+
+		//MP
+		for (i in combi){
+			if (combi[i]==0){
+				for (j in check){
+					if (j!=i && check[j]>=0){
+						mp++;
+						check[k]=-2;
+						break;
+					}
+				}
+			}
+		}
+		console.log("Bien placé : "+bp+" Mal placé : "+mp);
+	}
+
+</script>
+</body>
+</html>
