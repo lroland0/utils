@@ -1,0 +1,36 @@
+version: '3.6'
+services:
+  web:
+    image: 'gitlab/gitlab-ee:latest'
+    restart: always
+    hostname: 'git.lroland.fr'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://git.lroland.fr'
+        gitlab_rails['gitlab_shell_ssh_port'] = 622
+    ports:
+      - '680:80'
+      - '6443:443'
+      - '622:22'
+    volumes:
+      - './data/config:/etc/gitlab'
+      - './data/logs:/var/log/gitlab'
+      - './data/data:/var/opt/gitlab'
+    shm_size: '256m'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.git.rule=Host(`git.lroland.fr`)"
+      - "traefik.http.routers.git.entrypoints=http"
+      - "traefik.http.services.git.loadbalancer.server.port=6443"
+        # TLS
+      - "traefik.http.routers.gits.rule=Host(`git.lroland.fr`)"
+      - "traefik.http.routers.gits.entrypoints=https"
+      - "traefik.http.routers.gits.tls.certresolver=lroland"
+        # Redirect
+      - "traefik.http.routers.git.middlewares=https_redirect"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
+    networks:
+      - web
+networks:
+  web:
+    external: true
