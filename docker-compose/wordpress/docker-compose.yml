@@ -1,0 +1,60 @@
+version: '3.6'
+
+networks:
+  # enable connection with Traefik
+  web:
+    external: true
+  # network for the app
+  backend:
+
+services:
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wp_wordpress
+    restart: always
+    environment:
+      # Connect WordPrerss to the database
+      WORDPRESS_DB_HOST: wp_db
+      WORDPRESS_DB_USER: louis
+      WORDPRESS_DB_PASSWORD: louis
+      WORDPRESS_DB_NAME: wordpressdb
+    volumes:
+      # save the content of WordPress an enable local modifications
+      - ./data:/var/www/html
+    networks:
+      - web
+      - backend
+    
+    depends_on:
+        - wp_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wp.rule=Host(`wp.lroland.fr`)"
+      - "traefik.http.routers.wp.entrypoints=http"
+        # TLS
+      - "traefik.http.routers.wps.rule=Host(`wp.lroland.fr`)"
+      - "traefik.http.routers.wps.entrypoints=https"
+      - "traefik.http.routers.wps.tls.certresolver=lroland"
+        # Redirect
+      - "traefik.http.routers.wp.middlewares=https_redirect"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
+
+  wp_db:
+    # this is the database used by Wordpress
+    image: mysql:5.7
+    container_name: wp_db
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      # Connect WordPrerss to the database
+      MYSQL_DATABASE: wordpressdb
+      MYSQL_USER: louis
+      MYSQL_PASSWORD: louis
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      # Persist the database on disk
+      - ./db:/var/lib/mysql
+    networks:
+      - web
