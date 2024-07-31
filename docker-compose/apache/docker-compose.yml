@@ -1,0 +1,27 @@
+version: '3.6'
+
+services:
+  www:
+    image: yoanbernabeu/php8.0:1.0
+    container_name: apache
+    volumes:
+        - ./conf:/etc/apache2/sites-enabled
+        - /utils/www/:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.apache.rule=Host(`lroland.fr`)"
+      - "traefik.http.routers.apache.entrypoints=http"
+        # TLS
+      - "traefik.http.routers.apaches.rule=Host(`lroland.fr`)"
+      - "traefik.http.routers.apaches.entrypoints=https"
+      - "traefik.http.routers.apaches.tls.certresolver=lroland"
+        # Redirect
+      - "traefik.http.routers.apache.middlewares=https_redirect"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
+    restart: always
+    networks:
+        - web
+
+networks:
+  web:
+    external: true
